@@ -26,15 +26,8 @@ app.get("/api/movies", (req, res) => {
   options.qs = { type: "get-boxoffice-movies", page: "1" };
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
-    // body.movie_results.forEach(function(movie_details) {
-    //   options.qs = { type: "get-movies-images-by-imdb", "imdb": movie_details.imdb_id};
-    //   request(options, function (error, response, body) {
-    //     console.log('ayyyyy', body);
-    //   });
-    //   console.log(movie_details);
-    // });
+    console.log("GET /api/movies: ", body);
     res.send(body);
-    
   });
 });
 
@@ -42,16 +35,8 @@ app.get("/api/movies/image/:imdb_id", (req, res) => {
   options.qs = { type: "get-movies-images-by-imdb", "imdb": req.params.imdb_id };
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
-    // body.movie_results.forEach(function(movie_details) {
-    //   options.qs = { type: "get-movies-images-by-imdb", "imdb": movie_details.imdb_id};
-    //   request(options, function (error, response, body) {
-    //     console.log('ayyyyy', body);
-    //   });
-    //   console.log(movie_details);
-    // });
-    console.log('imageDATA', body);
     res.send(body);
-    
+    console.log("GET /api/movies/image/:imdb_id: ", body);
   });
 });
 
@@ -60,7 +45,7 @@ app.get("/api/movies/search", (req, res) => {
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
     res.send(body);
-    console.log(body);
+    console.log("GET /api/movies/search: ", body);
   });
 });
 
@@ -69,7 +54,7 @@ app.get("/api/movie/details", (req, res) => {
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
     res.send(body);
-    console.log(body);
+    console.log("GET /api/movie/details ", body);
   });
 });
 

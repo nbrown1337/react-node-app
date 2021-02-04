@@ -23,6 +23,7 @@ class App extends Component {
     responseToPost: "",
     movies: null,
     movieDetails: null,
+    moviePoster: null,
   };
 
   componentDidMount() {
@@ -38,25 +39,9 @@ class App extends Component {
     if (response.status !== 200) throw Error(body.message);
     this.setState({ movies: body });
     // We are limited to 5 requests a second on RapidAPI:
-    let count = 0;
-    
-      body.movie_results.forEach(function(movie_details, index) {
-        if(count === 0 ){
-          console.log(count);
-          let imageResponse = this.callImageApi(movie_details.imdb_id);
-          console.log(imageResponse);
-          
-         // count++;
-        } else {
-          // setTimeout(function(){
-          //   console.log('else');
-          //   this.callImageApi(movie_details.imdb_id);
-          //   count = 0;
-          // }.bind(this), 3500);
-        }
-      }.bind(this));
-    
-    
+    body.movie_results.forEach(function(movie_details, index) {
+      this.callImageApi(movie_details.imdb_id);
+    }.bind(this));
     return body;
   };
 
@@ -65,12 +50,16 @@ class App extends Component {
     const body = await response.json();
 
     if (response.status !== 200) throw Error(body.message);
-    //this.setState({ movies: body });
+    // Our free API plan is limited to 5 requests a second, this code block ensures to repeat requests until they are all fufilled
+    if(body.hasOwnProperty('message') && body.message === "You have exceeded the rate limit per second for your plan, BASIC, by the API provider"){
+      setTimeout(function(){
+        this.callImageApi(imdb_id);
+      }.bind(this), 1000);
+    }
     var result = this.state.movies.movie_results.filter(obj => {
       return obj.imdb_id === body.IMDB;
     })
     if(result[0]) result[0].poster = body.poster;
-    console.log(result);
     // We modified the state, call setState
     this.setState({ movies: this.state.movies });
     return body;
@@ -101,7 +90,18 @@ class App extends Component {
     });
     const body = await response.json();
 
-    this.setState({ movieDetails: body });
+    var result = this.state.movies.movie_results.filter(obj => {
+      return obj.imdb_id === body.imdb_id;
+    });
+    // Our free API plan is limited to 5 requests a second, this code block ensures to repeat requests until they are all fufilled
+    if(body.hasOwnProperty('message') && body.message === "You have exceeded the rate limit per second for your plan, BASIC, by the API provider"){
+      setTimeout(function(){
+        this.handleMovieClick(imdb_id);
+      }.bind(this), 1000);
+    } else {
+      this.setState({ movieDetails: body });
+      if(result[0]) this.setState({ moviePoster: result[0].poster })
+    }
   };
 
   handleBackClick = async (e) => {
@@ -120,6 +120,7 @@ class App extends Component {
               Made with <FontAwesomeIcon className="fa" icon="heart" /> by{" "}
               <a href="#">Nathan Brown</a>
             </span>
+            { !this.state.movieDetails &&
             <div className="formDiv">
               <form onSubmit={this.handleSubmitClick}>
                 <input
@@ -140,6 +141,7 @@ class App extends Component {
               </form>
               <p>{this.state.responseToPost}</p>
             </div>
+          }
           </div>
           {this.state.movies &&
             !this.state.movieDetails &&
@@ -176,11 +178,11 @@ class App extends Component {
               <div className="demo-title"></div>
 
               <div className="post-module wide">
-                <div className="thumbnail">
+                <div className="thumbnail wide">
                   <div className="date">
                     <div className="day">{this.state.movieDetails.year}</div>
                   </div>
-                  <img src={background} />
+                  <img src={this.state.moviePoster ? this.state.moviePoster : background} />
                 </div>
 
                 <div className="post-content wide">
