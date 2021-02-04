@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import logo from "./logo.svg";
-import background from "./movie-reel.jpg";
+import background from "./movie-reel.png";
 import { ReactComponent as ImdbLogo } from "./imdb-brands.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCoffee } from "@fortawesome/free-solid-svg-icons";
@@ -41,15 +41,18 @@ class App extends Component {
     let count = 0;
     
       body.movie_results.forEach(function(movie_details, index) {
-        if(count < 4){
+        if(count === 0 ){
           console.log(count);
-          this.callImageApi(movie_details.imdb_id);
-          count++;
+          let imageResponse = this.callImageApi(movie_details.imdb_id);
+          console.log(imageResponse);
+          
+         // count++;
         } else {
-          setTimeout(function(){
-            this.callImageApi(movie_details.imdb_id);
-            count = 0;
-          }.bind(this), 1000);
+          // setTimeout(function(){
+          //   console.log('else');
+          //   this.callImageApi(movie_details.imdb_id);
+          //   count = 0;
+          // }.bind(this), 3500);
         }
       }.bind(this));
     
