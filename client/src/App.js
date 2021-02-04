@@ -37,6 +37,39 @@ class App extends Component {
 
     if (response.status !== 200) throw Error(body.message);
     this.setState({ movies: body });
+    // We are limited to 5 requests a second on RapidAPI:
+    let count = 0;
+    
+      body.movie_results.forEach(function(movie_details, index) {
+        if(count < 4){
+          console.log(count);
+          this.callImageApi(movie_details.imdb_id);
+          count++;
+        } else {
+          setTimeout(function(){
+            this.callImageApi(movie_details.imdb_id);
+            count = 0;
+          }.bind(this), 1000);
+        }
+      }.bind(this));
+    
+    
+    return body;
+  };
+
+  callImageApi = async (imdb_id) => {
+    const response = await fetch("/api/movies/image/" + imdb_id);
+    const body = await response.json();
+
+    if (response.status !== 200) throw Error(body.message);
+    //this.setState({ movies: body });
+    var result = this.state.movies.movie_results.filter(obj => {
+      return obj.imdb_id === body.IMDB;
+    })
+    if(result[0]) result[0].poster = body.poster;
+    console.log(result);
+    // We modified the state, call setState
+    this.setState({ movies: this.state.movies });
     return body;
   };
 
@@ -120,7 +153,7 @@ class App extends Component {
                     <div className="date">
                       <div className="day">{movie.year}</div>
                     </div>
-                    <img src={background} />
+                    <img src={movie.poster ? movie.poster : background} />
                   </div>
 
                   <div className="post-content">
